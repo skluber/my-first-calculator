@@ -19,6 +19,14 @@ body {
 
 .calculator-display {
     text-align: right;
+    background-color: #1a1a1a;
+}
+
+#display {
+    text-align: right;
+    background-color: #1a1a1a;
+    text-decoration: none;
+    color: white;
 }
 
 .calculator-keys {
