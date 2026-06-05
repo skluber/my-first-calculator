@@ -1,6 +1,6 @@
 const keys = document.querySelector('.calculator-keys');
 const display = document.querySelector('#display');
-const operators = ["-", "+", "*", "%", "/", "="]
+const operators = ["-", "+", "*", "/", "="]
 
 const calculator = {
     displayValue: '0',
@@ -34,6 +34,11 @@ keys.addEventListener('click', (event) => {
 
     // Decimal point
     if (target.classList.contains('decimal')) {
+        if (calculator.isResult) {
+            calculator.displayValue = '0';
+            calculator.firstNumber = null;
+            calculator.isResult = false;
+        }
         inputDecimal();
         updateDisplay();
         return;
@@ -43,14 +48,15 @@ keys.addEventListener('click', (event) => {
         if (calculator.displayValue === '0') {
             console.log("Can't perform any operation");
             return;
-        } else {
-            if (calculator.isResult) {
-                if (target.value === "=") return;
-                calculator.isResult = false;
-                calculator.firstNumber = calculator.displayValue;
-            }
-            operatorPressed(target.value);
         }
+
+        if (calculator.isResult) {
+            if (target.value === "=") return; 
+            calculator.isResult = false;
+            calculator.firstNumber = calculator.displayValue;
+        }
+        
+        operatorPressed(target.value);
 
     } else { // It's a number
         if (calculator.isResult) {
@@ -61,7 +67,6 @@ keys.addEventListener('click', (event) => {
 
         inputDigit(target.value);
         updateDisplay();
-
     }
 });
 
@@ -76,11 +81,9 @@ document.addEventListener('keydown', (event) => {
         event.preventDefault(); 
         button.click();
     }
-})
+});
 
 function inputDigit(digit) {
-    const displayValue = calculator.displayValue;
-
     // Second number
     if (calculator.waitingForSecondNumber) {
         if (calculator.secondNumber === null) {
@@ -90,9 +93,10 @@ function inputDigit(digit) {
         }
         calculator.displayValue += digit;
 
-        // First Number
+    // First Number
     } else {
-        if (calculator.displayValue === '0') {
+        // FIXED: Checking the atomic variable state instead of global layout string
+        if (calculator.firstNumber === null || calculator.firstNumber === '0') {
             calculator.displayValue = digit;
             calculator.firstNumber = digit;
         } else {
@@ -109,23 +113,15 @@ function updateDisplay() {
 
 function operatorPressed(operator) {
     if (!calculator.waitingForSecondNumber && operator === '=') {
-        return; // No operation, just show the number 
+        return; 
 
     } else {
         if (!calculator.waitingForSecondNumber) {
-            // First we save the number
             calculator.waitingForSecondNumber = true;
             calculator.operator = operator;
-
-            // Then we add the operator to display
             calculator.displayValue += operator;
             updateDisplay();
-
-            console.log(`Number[1]: ${calculator.firstNumber}`);
-            console.log(`Operator added: ${calculator.operator}`);
         } else {
-            console.log(`Number[2]: ${calculator.secondNumber}`)
-
             if (operator != '=') { // For multiple operations
                 if (calculator.secondNumber === null) {
                     newOperatorFound(operator);
@@ -138,6 +134,7 @@ function operatorPressed(operator) {
                             calculator.displayValue = "ERROR!"
                             updateDisplay();
                             resetCalculator();
+                            return; 
                         }
                         calculator.firstNumber = divideNumbers(calculator.firstNumber, calculator.secondNumber);
                         calculator.secondNumber = null;
@@ -170,9 +167,8 @@ function operatorPressed(operator) {
                             calculator.displayValue = "ERROR!"
                             updateDisplay();
                             calculator.isResult = true;
-
                             resetCalculator();
-                            return;
+                            return; 
                         }
                         calculator.displayValue = divideNumbers(calculator.firstNumber, calculator.secondNumber);
                         break;
@@ -193,7 +189,6 @@ function operatorPressed(operator) {
                 calculator.isResult = true;
                 updateDisplay();
                 resetCalculator();
-                console.table(calculator);
             }
         }
     }
@@ -228,7 +223,7 @@ function roundResult(result) {
             return Number(result).toExponential(5);
         }
 
-        const allowedDecimals = maxCharacters - integerLength - 1; // -1 for decimal
+        const allowedDecimals = maxCharacters - integerLength - 1;
         
         if (allowedDecimals > 0) {
             return String(Number(Number(result).toFixed(allowedDecimals)));
@@ -241,13 +236,11 @@ function roundResult(result) {
 }
 
 function removeLast() {
-    // Only one digit
-    if (calculator.displayValue.length === 1) {
+    if (calculator.displayValue.length === 1 || calculator.displayValue === "ERROR!") {
         allClear();
         return;
     }
 
-    // It's a result
     if (calculator.isResult) {
         calculator.displayValue = calculator.displayValue.slice(0, -1);
         calculator.firstNumber = calculator.displayValue;
@@ -257,14 +250,11 @@ function removeLast() {
     }
 
     if (operators.includes(calculator.displayValue[calculator.displayValue.length - 1])) {
-        // We are trying to delete an operator
-        console.log("Deleting an operator")
         calculator.displayValue = calculator.displayValue.slice(0, -1);
         calculator.operator = null;
         calculator.waitingForSecondNumber = false;
         calculator.secondNumber = null;
     } else {
-        // Second number 
         if (calculator.waitingForSecondNumber) {
             if (calculator.secondNumber.length > 1) {
                 calculator.displayValue = calculator.displayValue.slice(0, -1);
@@ -273,7 +263,6 @@ function removeLast() {
                 calculator.displayValue = calculator.displayValue.slice(0, -1);
                 calculator.secondNumber = null;
             }
-            // First number
         } else {
             if (calculator.firstNumber.length > 1) {
                 calculator.displayValue = calculator.displayValue.slice(0, -1);
@@ -281,47 +270,40 @@ function removeLast() {
             }
         }
     }
+    updateDisplay(); 
 }
 
 function newOperatorFound(operator) {
     calculator.displayValue = calculator.displayValue.slice(0, -1);
     calculator.displayValue += operator;
     calculator.operator = operator;
-    console.log(`New operator found: ${operator}`);
     updateDisplay();
 }
 
 function inputDecimal() {
-    if (calculator.displayValue[calculator.displayValue.length - 1] === ".") {
-        console.log("Last digit was already a decimal!");
-        return;
-    }
-
-    if (calculator.isResult) {
-        calculator.displayValue = '0.';
-        calculator.firstNumber = '0.';
-        calculator.isResult = false;
-        updateDisplay();
-        return;
-    }
+    if (calculator.displayValue.endsWith('.')) return;
 
     if (calculator.waitingForSecondNumber) {
         if (calculator.secondNumber === null) {
             calculator.secondNumber = '0.';
             calculator.displayValue += '0.';
+            return;
         }
         if (!calculator.secondNumber.includes('.')) {
             calculator.secondNumber += '.';
             calculator.displayValue += '.';
+            return;
         }
     } else {
         if (calculator.firstNumber === null || calculator.firstNumber === '0') {
             calculator.firstNumber = '0.';
             calculator.displayValue = '0.';
+            return;
         }
         if (!calculator.firstNumber.includes('.')) {
             calculator.firstNumber += '.';
             calculator.displayValue += '.';
+            return;
         }
     }
 }
@@ -340,4 +322,4 @@ function divideNumbers(num1, num2) {
 
 function multiplyNumbers(num1, num2) {
     return String(roundResult(Number(num1) * Number(num2)));
-}   
+}
