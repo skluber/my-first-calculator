@@ -18,6 +18,13 @@ keys.addEventListener('click', (event) => {
         return; // Not a button 
     }
 
+    // All-Clear found
+    if (target.classList.contains('all-clear')) {
+        allClear();
+        updateDisplay();
+        return;
+    }
+
     if (operators.includes(target.value)) { // It's an operator
         if (calculator.displayValue === '0') {
             console.log("Can't perform any operation");
@@ -40,7 +47,6 @@ keys.addEventListener('click', (event) => {
         updateDisplay();
 
     }
-
 });
 
 
@@ -70,6 +76,7 @@ function inputDigit(digit) {
 
 function updateDisplay() {
     display.value = calculator.displayValue;
+    console.table(calculator);
 }
 
 function operatorPressed(operator) {
@@ -159,8 +166,6 @@ function operatorPressed(operator) {
             }
         }
     }
-
-
 }
 
 function resetCalculator() {
