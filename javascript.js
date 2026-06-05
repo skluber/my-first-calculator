@@ -34,13 +34,9 @@ keys.addEventListener('click', (event) => {
 
     // Decimal point
     if (target.classList.contains('decimal')) {
-        if (checkDecimalAllowed()) {
-            inputDigit(target.value);
-            updateDisplay();
-            return;
-        } else {
-            return;
-        }
+        inputDecimal();
+        updateDisplay();
+        return;
     }
 
     if (operators.includes(target.value)) { // It's an operator
@@ -283,7 +279,7 @@ function newOperatorFound(operator) {
     updateDisplay();
 }
 
-function checkDecimalAllowed() {
+function inputDecimal() {
     if (calculator.displayValue[calculator.displayValue.length - 1] === ".") {
         console.log("Last digit was already a decimal!");
         return false;
@@ -298,18 +294,24 @@ function checkDecimalAllowed() {
     }
 
     if (calculator.waitingForSecondNumber) {
-        if (Number.isInteger(Number(calculator.secondNumber))) {
-            return true;
-        } else {
-            console.log("Can't add more decimals to second number");
-            return false;
+        if (calculator.secondNumber === null) {
+            calculator.secondNumber = '0.';
+            calculator.displayValue += '0.';
+            return;
+        }
+        if (!calculator.secondNumber.includes('.')) {
+            calculator.secondNumber += '.';
+            calculator.displayValue += '.';
         }
     } else {
-        if (Number.isInteger(Number(calculator.firstNumber))) {
-            return true;
-        } else {
-            console.log("Can't add more decimals to first number");
-            return false;
+        if (calculator.firstNumber === null || calculator.displayValue === '0') {
+            calculator.firstNumber = '0.';
+            calculator.displayValue = '0.';
+            return;
+        }
+        if (!calculator.firstNumber.includes('.')) {
+            calculator.firstNumber += '.';
+            calculator.displayValue += '.';
         }
     }
 }
