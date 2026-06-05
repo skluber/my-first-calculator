@@ -8,6 +8,7 @@ const calculator = {
     secondNumber: null,
     waitingForSecondNumber: false,
     operator: null,
+    isResult: false,
 }
 
 keys.addEventListener('click', (event) => {
@@ -17,16 +18,24 @@ keys.addEventListener('click', (event) => {
         return; // Not a button 
     }
 
-    if (operators.includes(target.value)) {
+    if (operators.includes(target.value)) { // It's an operator
         if (calculator.displayValue === '0') {
-            console.log("No numbers found to make an operation");
+            console.log("Can't perform any operation");
             return;
         } else {
-            operatorPressed(target.value);
+            if (calculator.isResult) {
+                calculator.isResult = false;
+                calculator.firstNumber = calculator.displayValue;
+            } 
+                operatorPressed(target.value);
         }
 
+    } else { // It's a number
+        if (calculator.isResult) {
+            calculator.displayValue = '0';
+            calculator.isResult = false;
+        }
 
-    } else {
         inputDigit(target.value);
         updateDisplay();
 
@@ -82,7 +91,7 @@ function operatorPressed(operator) {
         } else {
             console.log(`Number[2]: ${calculator.secondNumber}`)
 
-            if (operator != '=') {
+            if (operator != '=') { // For multiple operations
                 if (calculator.secondNumber === null) {
                     newOperatorFound(operator);
                     return;
@@ -119,7 +128,7 @@ function operatorPressed(operator) {
                 calculator.displayValue = calculator.firstNumber + calculator.operator;
                 updateDisplay();
 
-            } else {
+            } else { // For single operations
                 switch (calculator.operator) {
                     case '/':
                         if (calculator.secondNumber === '0') {
@@ -143,8 +152,10 @@ function operatorPressed(operator) {
                         break;
                 }
 
+                calculator.isResult = true;
                 updateDisplay();
                 resetCalculator();
+                console.table(calculator);
             }
         }
     }
@@ -153,11 +164,16 @@ function operatorPressed(operator) {
 }
 
 function resetCalculator() {
-    calculator.displayValue = '0';
     calculator.firstNumber = null;
     calculator.secondNumber = null;
     calculator.waitingForSecondNumber = false;
     calculator.operator = null;
+}
+
+function allClear() {
+    resetCalculator();
+    calculator.isResult = false;
+    calculator.displayValue = '0';
 }
 
 function newOperatorFound(operator) {
