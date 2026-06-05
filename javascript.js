@@ -282,7 +282,7 @@ function newOperatorFound(operator) {
 function inputDecimal() {
     if (calculator.displayValue[calculator.displayValue.length - 1] === ".") {
         console.log("Last digit was already a decimal!");
-        return false;
+        return;
     }
 
     if (calculator.isResult) {
@@ -290,24 +290,22 @@ function inputDecimal() {
         calculator.firstNumber = '0.';
         calculator.isResult = false;
         updateDisplay();
-        return false;
+        return;
     }
 
     if (calculator.waitingForSecondNumber) {
         if (calculator.secondNumber === null) {
             calculator.secondNumber = '0.';
             calculator.displayValue += '0.';
-            return;
         }
         if (!calculator.secondNumber.includes('.')) {
             calculator.secondNumber += '.';
             calculator.displayValue += '.';
         }
     } else {
-        if (calculator.firstNumber === null || calculator.displayValue === '0') {
+        if (calculator.firstNumber === null || calculator.firstNumber === '0') {
             calculator.firstNumber = '0.';
             calculator.displayValue = '0.';
-            return;
         }
         if (!calculator.firstNumber.includes('.')) {
             calculator.firstNumber += '.';
