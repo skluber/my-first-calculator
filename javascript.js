@@ -32,13 +32,24 @@ keys.addEventListener('click', (event) => {
         return;
     }
 
+    // Decimal point
+    if (target.classList.contains('decimal')) {
+        if (checkDecimalAllowed()) {
+            inputDigit(target.value);
+            updateDisplay();
+            return;
+        } else {
+            return;
+        }
+    }
+
     if (operators.includes(target.value)) { // It's an operator
         if (calculator.displayValue === '0') {
             console.log("Can't perform any operation");
             return;
         } else {
             if (calculator.isResult) {
-                if (target.value === "=") return; 
+                if (target.value === "=") return;
                 calculator.isResult = false;
                 calculator.firstNumber = calculator.displayValue;
             }
@@ -233,13 +244,43 @@ function removeLast() {
     }
 }
 
-
 function newOperatorFound(operator) {
     calculator.displayValue = calculator.displayValue.slice(0, -1);
     calculator.displayValue += operator;
     calculator.operator = operator;
     console.log(`New operator found: ${operator}`);
     updateDisplay();
+}
+
+function checkDecimalAllowed() {
+    if (calculator.displayValue[calculator.displayValue.length - 1] === ".") {
+        console.log("Last digit was already a decimal!");
+        return false;
+    }
+
+    if (calculator.isResult) {
+        calculator.displayValue = '0.';
+        calculator.firstNumber = '0.';
+        calculator.isResult = false;
+        updateDisplay();
+        return false;
+    }
+
+    if (calculator.waitingForSecondNumber) {
+        if (Number.isInteger(Number(calculator.secondNumber))) {
+            return true;
+        } else {
+            console.log("Can't add more decimals to second number");
+            return false;
+        }
+    } else {
+        if (Number.isInteger(Number(calculator.firstNumber))) {
+            return true;
+        } else {
+            console.log("Can't add more decimals to first number");
+            return false;
+        }
+    }
 }
 
 function sumNumbers(num1, num2) {
