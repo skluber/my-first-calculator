@@ -25,6 +25,13 @@ keys.addEventListener('click', (event) => {
         return;
     }
 
+    // Remove character found
+    if (target.classList.contains('remove-last')) {
+        removeLast();
+        updateDisplay();
+        return;
+    }
+
     if (operators.includes(target.value)) { // It's an operator
         if (calculator.displayValue === '0') {
             console.log("Can't perform any operation");
@@ -33,8 +40,8 @@ keys.addEventListener('click', (event) => {
             if (calculator.isResult) {
                 calculator.isResult = false;
                 calculator.firstNumber = calculator.displayValue;
-            } 
-                operatorPressed(target.value);
+            }
+            operatorPressed(target.value);
         }
 
     } else { // It's a number
@@ -181,6 +188,50 @@ function allClear() {
     calculator.displayValue = '0';
 }
 
+function removeLast() {
+    // Only one digit
+    if (calculator.displayValue.length === 1) {
+        allClear();
+        return;
+    }
+
+    // It's a result
+    if (calculator.isResult) {
+        calculator.displayValue = calculator.displayValue.slice(0, -1);
+        calculator.firstNumber = calculator.displayValue;
+        calculator.isResult = false;
+        updateDisplay();
+        return;
+    }
+
+    if (operators.includes(calculator.displayValue[calculator.displayValue.length - 1])) {
+        // We are trying to delete an operator
+        console.log("Deleting an operator")
+        calculator.displayValue = calculator.displayValue.slice(0, -1);
+        calculator.operator = null;
+        calculator.waitingForSecondNumber = false;
+        calculator.secondNumber = null;
+    } else {
+        // Second number 
+        if (calculator.waitingForSecondNumber) {
+            if (calculator.secondNumber.length > 1) {
+                calculator.displayValue = calculator.displayValue.slice(0, -1);
+                calculator.secondNumber = calculator.secondNumber.slice(0, -1);
+            } else {
+                calculator.displayValue = calculator.displayValue.slice(0, -1);
+                calculator.secondNumber = null;
+            }
+            // First number
+        } else {
+            if (calculator.firstNumber.length > 1) {
+                calculator.displayValue = calculator.displayValue.slice(0, -1);
+                calculator.firstNumber = calculator.firstNumber.slice(0, -1);
+            }
+        }
+    }
+}
+
+
 function newOperatorFound(operator) {
     calculator.displayValue = calculator.displayValue.slice(0, -1);
     calculator.displayValue += operator;
@@ -190,17 +241,17 @@ function newOperatorFound(operator) {
 }
 
 function sumNumbers(num1, num2) {
-    return Number(num1) + Number(num2);
+    return String(Number(num1) + Number(num2));
 }
 
 function subtractNumbers(num1, num2) {
-    return Number(num1) - Number(num2);
+    return String(Number(num1) - Number(num2));
 }
 
 function divideNumbers(num1, num2) {
-    return Number(num1) / Number(num2);
+    return String(Number(num1) / Number(num2));
 }
 
 function multiplyNumbers(num1, num2) {
-    return Number(num1) * Number(num2);
+    return String(Number(num1) * Number(num2));
 }
