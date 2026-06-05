@@ -18,14 +18,14 @@ keys.addEventListener('click', (event) => {
         return; // Not a button 
     }
 
-    // All-Clear found
+    // All-Clear 
     if (target.classList.contains('all-clear')) {
         allClear();
         updateDisplay();
         return;
     }
 
-    // Remove character found
+    // Remove last character 
     if (target.classList.contains('remove-last')) {
         removeLast();
         updateDisplay();
@@ -38,6 +38,7 @@ keys.addEventListener('click', (event) => {
             return;
         } else {
             if (calculator.isResult) {
+                if (target.value === "=") return; 
                 calculator.isResult = false;
                 calculator.firstNumber = calculator.displayValue;
             }
@@ -47,6 +48,7 @@ keys.addEventListener('click', (event) => {
     } else { // It's a number
         if (calculator.isResult) {
             calculator.displayValue = '0';
+            calculator.firstNumber = null;
             calculator.isResult = false;
         }
 
