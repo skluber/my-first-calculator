@@ -161,7 +161,10 @@ function operatorPressed(operator) {
                         if (calculator.secondNumber === '0') {
                             calculator.displayValue = "ERROR!"
                             updateDisplay();
+                            calculator.isResult = true;
+
                             resetCalculator();
+                            return;
                         }
                         calculator.displayValue = divideNumbers(calculator.firstNumber, calculator.secondNumber);
                         break;
@@ -199,6 +202,34 @@ function allClear() {
     resetCalculator();
     calculator.isResult = false;
     calculator.displayValue = '0';
+}
+
+function roundResult(result) {
+    const maxCharacters = 11;
+    let resultStr = String(result);
+
+    if (resultStr.length <= maxCharacters) {
+        return resultStr;
+    }
+
+    if (resultStr.includes('.')) {
+        const parts = resultStr.split('.');
+        const integerLength = parts[0].length;
+
+        if (integerLength >= maxCharacters) {
+            return Number(result).toExponential(5);
+        }
+
+        const allowedDecimals = maxCharacters - integerLength - 1; // -1 for decimal
+        
+        if (allowedDecimals > 0) {
+            return String(Number(Number(result).toFixed(allowedDecimals)));
+        } else {
+            return String(Math.round(Number(result)));
+        }
+    }
+
+    return Number(result).toExponential(5);
 }
 
 function removeLast() {
@@ -284,17 +315,17 @@ function checkDecimalAllowed() {
 }
 
 function sumNumbers(num1, num2) {
-    return String(Number(num1) + Number(num2));
+    return String(roundResult(Number(num1) + Number(num2)));
 }
 
 function subtractNumbers(num1, num2) {
-    return String(Number(num1) - Number(num2));
+    return String(roundResult(Number(num1) - Number(num2)));
 }
 
 function divideNumbers(num1, num2) {
-    return String(Number(num1) / Number(num2));
+    return String(roundResult(Number(num1) / Number(num2)));
 }
 
 function multiplyNumbers(num1, num2) {
-    return String(Number(num1) * Number(num2));
-}
+    return String(roundResult(Number(num1) * Number(num2)));
+}   
