@@ -65,6 +65,18 @@ keys.addEventListener('click', (event) => {
     }
 });
 
+document.addEventListener('keydown', (event) => {
+    let key = event.key;
+
+    key = event.key === 'Enter' ? '=' : event.key;
+
+    const button = document.querySelector(`button[value="${key}"]`);
+
+    if (button) {
+        event.preventDefault(); 
+        button.click();
+    }
+})
 
 function inputDigit(digit) {
     const displayValue = calculator.displayValue;
