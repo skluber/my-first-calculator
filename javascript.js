@@ -38,10 +38,24 @@ keys.addEventListener('click', (event) => {
 function inputDigit(digit) {
     const displayValue = calculator.displayValue;
 
-    if (displayValue === '0') {
-        calculator.displayValue = digit;
-    } else {
+    // Second number
+    if (calculator.waitingForSecondNumber) {
+        if (calculator.secondNumber === null) {
+            calculator.secondNumber = digit;
+        } else {
+            calculator.secondNumber += digit;
+        }
         calculator.displayValue += digit;
+
+        // First Number
+    } else {
+        if (calculator.displayValue === '0') {
+            calculator.displayValue = digit;
+            calculator.firstNumber = digit;
+        } else {
+            calculator.displayValue += digit;
+            calculator.firstNumber += digit;
+        }
     }
 }
 
@@ -56,7 +70,6 @@ function operatorPressed(operator) {
     } else {
         if (!calculator.waitingForSecondNumber) {
             // First we save the number
-            calculator.firstNumber = calculator.displayValue;
             calculator.waitingForSecondNumber = true;
             calculator.operator = operator;
 
@@ -67,25 +80,38 @@ function operatorPressed(operator) {
             console.log(`Number[1]: ${calculator.firstNumber}`);
             console.log(`Operator added: ${calculator.operator}`);
         } else {
-            calculator.secondNumber = calculator.displayValue.split(/[+\-*/]/)[1];
-            console.log(`Number[2]: ${calculator.secondNumber}`);
+            console.log(`Number[2]: ${calculator.secondNumber}`)
 
             if (operator != '=') {
+                if (calculator.secondNumber === null) {
+                    newOperatorFound(operator);
+                    return;
+                }
+
                 switch (calculator.operator) {
                     case '/':
+                        if (calculator.secondNumber === '0') {
+                            calculator.displayValue = "ERROR!"
+                            updateDisplay();
+                            resetCalculator();
+                        }
                         calculator.firstNumber = divideNumbers(calculator.firstNumber, calculator.secondNumber);
+                        calculator.secondNumber = null;
                         break;
 
                     case '*':
                         calculator.firstNumber = multiplyNumbers(calculator.firstNumber, calculator.secondNumber);
+                        calculator.secondNumber = null;
                         break;
 
                     case '-':
                         calculator.firstNumber = subtractNumbers(calculator.firstNumber, calculator.secondNumber);
+                        calculator.secondNumber = null;
                         break;
 
                     case '+':
                         calculator.firstNumber = sumNumbers(calculator.firstNumber, calculator.secondNumber);
+                        calculator.secondNumber = null;
                         break;
                 }
 
@@ -96,6 +122,11 @@ function operatorPressed(operator) {
             } else {
                 switch (calculator.operator) {
                     case '/':
+                        if (calculator.secondNumber === '0') {
+                            calculator.displayValue = "ERROR!"
+                            updateDisplay();
+                            resetCalculator();
+                        }
                         calculator.displayValue = divideNumbers(calculator.firstNumber, calculator.secondNumber);
                         break;
 
@@ -127,6 +158,14 @@ function resetCalculator() {
     calculator.secondNumber = null;
     calculator.waitingForSecondNumber = false;
     calculator.operator = null;
+}
+
+function newOperatorFound(operator) {
+    calculator.displayValue = calculator.displayValue.slice(0, -1);
+    calculator.displayValue += operator;
+    calculator.operator = operator;
+    console.log(`New operator found: ${operator}`);
+    updateDisplay();
 }
 
 function sumNumbers(num1, num2) {
